@@ -1,0 +1,35 @@
+<h2>Table</h2>
+
+<a [routerLink]="routeToCharts">Go to charts</a>
+
+<ng-container *ngIf="tableDataSets$ | async as tableDataSets">
+  <ng-container *ngIf="displayedColumns$ | async as displayedColumns">
+    <table mat-table
+           [dataSource]="tableDataSets">
+
+      <ng-container *ngFor="let displayedColumn of displayedColumns"
+                    [matColumnDef]="displayedColumn">
+        <ng-container [ngTemplateOutlet]="element"
+                      [ngTemplateOutletContext]="{ isDate: displayedColumn == 'date'}"></ng-container>
+
+        <ng-template #element
+                     let-isDate="isDate">
+          <th class="cell"
+              mat-header-cell
+              *matHeaderCellDef>{{ (isDate ? 'date' : resourceTypeNames[displayedColumn]) | titlecase }}</th>
+
+          <td class="cell"
+              mat-cell
+              *matCellDef="let element">
+            {{ isDate ? (element[displayedColumn] | date: 'HH:mm dd.MM') : element[displayedColumn] }}</td>
+        </ng-template>
+      </ng-container>
+
+      <tr mat-header-row
+          *matHeaderRowDef="displayedColumns"></tr>
+
+      <tr mat-row
+          *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </ng-container>
+</ng-container>

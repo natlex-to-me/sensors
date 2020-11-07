@@ -1,0 +1,11 @@
+<div class="chart">
+  <canvas baseChart
+          [chartType]="currentChartType"
+          [datasets]="dataSetsToShow"
+          [labels]="labels"
+          [options]="options"></canvas>
+
+  <button (click)="toggleChartsType(nextChartTypeIndex)"
+          mat-raised-button>Toggle charts to
+    {{ currentChartType }} mode</button>
+</div>

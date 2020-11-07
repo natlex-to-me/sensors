@@ -1,0 +1,45 @@
+<h2>Charts</h2>
+
+<a [routerLink]="routeToTable">Go to table</a>
+
+<div class="grid-layout">
+  <ng-container *ngIf="chartDataSets$ | async as chartDataSets">
+    <ng-container *ngIf="chartLabels$ | async as chartLabels">
+      <ng-container *ngFor="let resourceType of resourceTypes">
+        <div class="chart">
+          <h3>{{ resourceTypeNames[resourceType] }}</h3>
+
+          <app-chart [dataSets]="chartDataSets"
+                     [filterByLabel]="resourceTypeNames[resourceType]"
+                     [labels]="chartLabels"></app-chart>
+        </div>
+      </ng-container>
+
+      <div class="chart">
+        <h3>All-in-one</h3>
+
+        <app-chart [dataSets]="chartDataSets"
+                   [labels]="chartLabels"></app-chart>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>
+
+<ng-container *ngFor="let resourceType of resourceTypes">
+  <button (click)="toggleResource(resourceType)"
+          mat-raised-button>{{ resourceTypeNames[resourceType] }}
+    {{ resourceTypeToggles[resourceType] ? 'on' : 'off' }}</button>
+</ng-container>
+
+<mat-form-field>
+  <input matInput
+         (dateInput)="changeDate($event.value)"
+         [ngModel]="firstDay"
+         [matDatepicker]="picker"
+         [matDatepickerFilter]="disableDates">
+
+  <mat-datepicker-toggle matSuffix
+                         [for]="picker"></mat-datepicker-toggle>
+
+  <mat-datepicker #picker></mat-datepicker>
+</mat-form-field>
