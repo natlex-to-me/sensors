@@ -4,5 +4,5 @@ export const environment = {
     latitude: 61.790093,
     longitude: 34.375086,
   },
-  yandexWeatherApiKey: '6253b0d3-eade-47a1-a41e-63a44bed373b',
+  yandexWeatherApiKey: 'f5757f9c-b647-48e2-9d87-3fae4e865512',
 };
