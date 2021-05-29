@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 
 import { DetailsComponent } from './components/details/details.component';
-import { TableComponent } from './components/table/table.component';
 import { DetailPaths } from './detail-paths';
 
 export const routes: Routes = [
@@ -15,7 +14,7 @@ export const routes: Routes = [
       },
       {
         path: DetailPaths.table,
-        component: TableComponent,
+        loadChildren: () => import('./shared/table').then((m) => m.TableLazyLoadedModule),
       },
     ],
   },

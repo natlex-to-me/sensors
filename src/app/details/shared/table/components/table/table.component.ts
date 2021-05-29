@@ -1,13 +1,23 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+} from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppRoutes } from '../../../core/constants/app-routes';
-import { ResourceTypeNames, ResourceTypes } from '../../../core/constants/resource-types';
-import { unixTimeToDate } from '../../../core/utils/date-helpers';
-import { DataSetsForTable } from '../../models/data-sets-for-table';
-import { YandexWeatherForecast, YandexWeatherHourForecast } from '../../models/yandex-weather';
-import { WeatherStorageService } from '../../services/weather-storage.service';
+import { AppRoutes } from '../../../../../core/constants/app-routes';
+import {
+  ResourceTypeNames,
+  ResourceTypes,
+} from '../../../../../core/constants/resource-types';
+import { unixTimeToDate } from '../../../../../core/utils/date-helpers';
+import { DataSetsForTable } from '../../../../models/data-sets-for-table';
+import {
+  YandexWeatherForecast,
+  YandexWeatherHourForecast,
+} from '../../../../models/yandex-weather';
+import { WeatherStorageService } from '../../../../services/weather-storage.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
