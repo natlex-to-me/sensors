@@ -1,18 +1,21 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { DebugElement } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+} from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { environment } from '../../../../environments/environment';
-import { YandexWeatherConfigService } from '../../../core/backend/services/yandex-weather-config.service';
-import { RouterLinkStubDirective } from '../../../test/router-link-stub.directive';
-import { DetailPaths } from '../../detail-paths';
-import { DetailsLazyLoadedModule } from '../../details.lazy-loaded.module';
-import { routes } from '../../details.routes';
-import { CityCoordinatesConfigService } from '../../services/city-coordinates-config.service';
+import { environment } from '../../../../../../environments/environment';
+import { YandexWeatherConfigService } from '../../../../../core/backend/services/yandex-weather-config.service';
+import { RouterLinkStubDirective } from '../../../../../test/router-link-stub.directive';
+import { DetailPaths } from '../../../../detail-paths';
+import { DetailsLazyLoadedModule } from '../../../../details.lazy-loaded.module';
+import { routes } from '../../../../details.routes';
+import { CityCoordinatesConfigService } from '../../../../services/city-coordinates-config.service';
 import { ChartsComponent } from './charts.component';
 
 let component: ChartsComponent = null;

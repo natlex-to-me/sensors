@@ -1,15 +1,32 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { ChartDataSets } from 'chart.js';
 import { Label } from 'ng2-charts';
-import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Subject,
+} from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
-import { ResourceTypeColors, ResourceTypeNames, ResourceTypes, ResourceTypeToggles } from '../../../core/constants/resource-types';
-import { resetTimeForDate, unixTimeToDate } from '../../../core/utils/date-helpers';
-import { DetailPaths } from '../../detail-paths';
-import { DataSetsForCharts } from '../../models/data-sets-for-charts';
-import { YandexWeatherForecast } from '../../models/yandex-weather';
-import { WeatherStorageService } from '../../services/weather-storage.service';
+import {
+  ResourceTypeColors,
+  ResourceTypeNames,
+  ResourceTypes,
+  ResourceTypeToggles,
+} from '../../../../../core/constants/resource-types';
+import {
+  resetTimeForDate,
+  unixTimeToDate,
+} from '../../../../../core/utils/date-helpers';
+import { DetailPaths } from '../../../../detail-paths';
+import { DataSetsForCharts } from '../../../../models/data-sets-for-charts';
+import { YandexWeatherForecast } from '../../../../models/yandex-weather';
+import { WeatherStorageService } from '../../../../services/weather-storage.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

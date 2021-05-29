@@ -1,8 +1,17 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges } from '@angular/core';
-import { ChartDataSets, ChartOptions, ChartType } from 'chart.js';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnChanges,
+} from '@angular/core';
+import {
+  ChartDataSets,
+  ChartOptions,
+  ChartType,
+} from 'chart.js';
 import { Label } from 'ng2-charts';
 
-import { ChartTypeToggleOrder } from '../../../core/constants/chart-type-toggle-order';
+import { ChartTypeToggleOrder } from '../../../../../core/constants/chart-type-toggle-order';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

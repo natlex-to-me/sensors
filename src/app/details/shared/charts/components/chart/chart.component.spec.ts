@@ -1,12 +1,15 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+} from '@angular/core/testing';
 import { ChartType } from 'chart.js';
 
-import { environment } from '../../../../environments/environment';
-import { YandexWeatherConfigService } from '../../../core/backend/services/yandex-weather-config.service';
-import { ChartTypeToggleOrder } from '../../../core/constants/chart-type-toggle-order';
-import { SharedModule } from '../../../shared/shared.module';
-import { CityCoordinatesConfigService } from '../../services/city-coordinates-config.service';
+import { environment } from '../../../../../../environments/environment';
+import { YandexWeatherConfigService } from '../../../../../core/backend/services/yandex-weather-config.service';
+import { ChartTypeToggleOrder } from '../../../../../core/constants/chart-type-toggle-order';
+import { SharedModule } from '../../../../../shared/shared.module';
+import { CityCoordinatesConfigService } from '../../../../services/city-coordinates-config.service';
 import { ChartComponent } from './chart.component';
 
 let component: ChartComponent = null;
