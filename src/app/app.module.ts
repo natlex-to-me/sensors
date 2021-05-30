@@ -21,8 +21,8 @@ import { DetailsModule } from './details/details.module';
     BrowserModule,
     BrowserAnimationsModule,
     DetailsModule.forRoot({
-      latitude: environment.cityCoordinates.latitude,
-      longitude: environment.cityCoordinates.longitude,
+      latitude: environment.defaultCityCoordinates.latitude,
+      longitude: environment.defaultCityCoordinates.longitude,
     }),
   ],
   providers: [

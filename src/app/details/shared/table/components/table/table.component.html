@@ -1,6 +1,6 @@
 <h2>Table</h2>
 
-<a [routerLink]="routeToCharts">Go to charts</a>
+<a [routerLink]="routeToCharts$ | async">Go to charts</a>
 
 <ng-container *ngIf="tableDataSets$ | async as tableDataSets">
   <ng-container *ngIf="displayedColumns$ | async as displayedColumns">

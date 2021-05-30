@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  cityCoordinates: {
+  defaultCityCoordinates: {
     latitude: 61.790093,
     longitude: 34.375086,
   },

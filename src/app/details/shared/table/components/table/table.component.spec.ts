@@ -35,7 +35,7 @@ describe('TableComponent', () => {
         providers: [
           {
             provide: CityCoordinatesConfigService,
-            useValue: environment.cityCoordinates,
+            useValue: environment.defaultCityCoordinates,
           },
           {
             provide: YandexWeatherConfigService,

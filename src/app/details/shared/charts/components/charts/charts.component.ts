@@ -4,6 +4,7 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ChartDataSets } from 'chart.js';
 import { Label } from 'ng2-charts';
 import {
@@ -11,14 +12,24 @@ import {
   combineLatest,
   Subject,
 } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import {
+  concatMap,
+  map,
+  tap,
+} from 'rxjs/operators';
 
+import {
+  AppRouteParams,
+  AppRoutes,
+  CityCoordinates,
+} from '../../../../../core/constants';
 import {
   ResourceTypeColors,
   ResourceTypeNames,
   ResourceTypes,
   ResourceTypeToggles,
 } from '../../../../../core/constants/resource-types';
+import { Coordinates } from '../../../../../core/models';
 import {
   resetTimeForDate,
   unixTimeToDate,
@@ -38,11 +49,23 @@ export class ChartsComponent implements OnInit, OnDestroy {
   firstDay = new Date();
   lastDay = new Date();
   pickedDate = resetTimeForDate(new Date());
-  routeToTable = [DetailPaths.table];
 
   readonly resourceTypes = Object.values(ResourceTypes);
   readonly resourceTypeNames = ResourceTypeNames;
   readonly resourceTypeToggles = ResourceTypeToggles;
+
+  private readonly _cityId$ = this._route.params.pipe(
+    map((params) => String(params[AppRouteParams.CityId])),
+  );
+
+  readonly routeToTable$ = this._cityId$.pipe(
+    map((cityId) => AppRoutes.getUrlFromRoute(AppRoutes.Details, DetailPaths.table, cityId))
+  );
+
+  private readonly _cityCoordinates$ = this._cityId$.pipe(
+    map((cityId) => <Coordinates>CityCoordinates[cityId]),
+  );
+
   readonly _updatableWeatherForecasts$ = new BehaviorSubject(<YandexWeatherForecast[]>[]);
   readonly _weatherForecasts$ = new BehaviorSubject(<YandexWeatherForecast[]>[]);
 
@@ -94,12 +117,14 @@ export class ChartsComponent implements OnInit, OnDestroy {
   private readonly _doReload$ = new BehaviorSubject<void>(null);
 
   constructor(
+    private readonly _route: ActivatedRoute,
     private readonly _weatherStorage: WeatherStorageService,
   ) {
   }
 
   ngOnInit() {
-    this._weatherStorage.getYandexWeatherForecast().pipe(
+    this._cityCoordinates$.pipe(
+      concatMap((coordinates) => this._weatherStorage.getYandexWeatherForecast(coordinates.latitude, coordinates.longitude)),
       map((response) => response.forecasts),
       tap((forecasts) => {
         const withHourForecasts = forecasts.filter((i) => i.hours.length != 0);
