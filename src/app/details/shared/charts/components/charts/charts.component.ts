@@ -1,8 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
-  OnInit,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ChartDataSets } from 'chart.js';
@@ -10,11 +8,11 @@ import { Label } from 'ng2-charts';
 import {
   BehaviorSubject,
   combineLatest,
-  Subject,
 } from 'rxjs';
 import {
   concatMap,
   map,
+  shareReplay,
   tap,
 } from 'rxjs/operators';
 
@@ -45,7 +43,7 @@ import { WeatherStorageService } from '../../../../services/weather-storage.serv
   templateUrl: './charts.component.html',
   styleUrls: ['./charts.component.scss'],
 })
-export class ChartsComponent implements OnInit, OnDestroy {
+export class ChartsComponent {
   firstDay = new Date();
   lastDay = new Date();
   pickedDate = resetTimeForDate(new Date());
@@ -66,87 +64,42 @@ export class ChartsComponent implements OnInit, OnDestroy {
     map((cityId) => <Coordinates>CityCoordinates[cityId]),
   );
 
-  readonly _updatableWeatherForecasts$ = new BehaviorSubject(<YandexWeatherForecast[]>[]);
-  readonly _weatherForecasts$ = new BehaviorSubject(<YandexWeatherForecast[]>[]);
+  readonly _weatherForecasts$ = this._cityCoordinates$.pipe(
+    concatMap((coordinates) => this._weatherStorage.getYandexWeatherForecast(coordinates.latitude, coordinates.longitude)),
+    map((response) => response.forecasts),
+    tap((forecasts) => {
+      const withHourForecasts = forecasts.filter((i) => i.hours.length != 0);
 
-  readonly chartLabels$ = this._updatableWeatherForecasts$.pipe(
-    map((forecasts) => forecasts.reduce(
-      (acc, x) => acc.concat(
-        x.hours.filter((i) => this._filterChartByDate(i.hour_ts)).map((i) => `${unixTimeToDate(i.hour_ts).toUTCString()}`)
-      ),
-      <Label[]>[]
-    )),
+      this.firstDay = resetTimeForDate(new Date(withHourForecasts[0].date));
+      this.lastDay = resetTimeForDate(new Date(withHourForecasts[withHourForecasts.length - 1].date));
+    }),
+    shareReplay(),
+  );
+
+  private readonly _doReload$ = new BehaviorSubject<void>(null);
+
+  readonly _updatableWeatherForecasts$ = combineLatest(
+    [
+      this._weatherForecasts$,
+      this._doReload$,
+    ]
+  ).pipe(
+    map(([forecast]) => forecast),
   );
 
   readonly chartDataSets$ = this._updatableWeatherForecasts$.pipe(
-    map((forecasts) => forecasts.reduce(
-      (acc, x) => ({
-        humidity: acc.humidity.concat(x.hours.filter((i) => this._filterChartByDate(i.hour_ts)).map((i) => i.humidity)),
-        pressure: acc.pressure.concat(x.hours.filter((i) => this._filterChartByDate(i.hour_ts)).map((i) => i.pressure_mm)),
-        temperature: acc.temperature.concat(x.hours.filter((i) => this._filterChartByDate(i.hour_ts)).map((i) => i.temp)),
-      }),
-      <DataSetsForCharts>{
-        humidity: [],
-        pressure: [],
-        temperature: [],
-      }
-    )),
-    map((chartData) => {
-      const dataSet = <ChartDataSets[]>[];
-
-      this.resourceTypes.forEach((res) => {
-        if (this.resourceTypeToggles[res]) {
-          dataSet.push(
-            {
-              backgroundColor: `${<string>ResourceTypeColors[res]}50`,
-              borderColor: <string>ResourceTypeColors[res],
-              data: chartData[res],
-              label: <string>ResourceTypeNames[res],
-              pointBackgroundColor: <string>ResourceTypeColors[res],
-              pointBorderColor: <string>ResourceTypeColors[res],
-            },
-          );
-        }
-      });
-
-      return dataSet;
-    }),
+    map((forecasts) => this._convertForecastsToDataSets(forecasts)),
+    map((chartData) => this._convertDataSetsToChart(chartData)),
   );
 
-  private readonly _alive$ = new Subject();
-  private readonly _doReload$ = new BehaviorSubject<void>(null);
+  readonly chartLabels$ = this._updatableWeatherForecasts$.pipe(
+    map((forecasts) => this._convertForecastsToLabels(forecasts)),
+  );
 
   constructor(
     private readonly _route: ActivatedRoute,
     private readonly _weatherStorage: WeatherStorageService,
   ) {
-  }
-
-  ngOnInit() {
-    this._cityCoordinates$.pipe(
-      concatMap((coordinates) => this._weatherStorage.getYandexWeatherForecast(coordinates.latitude, coordinates.longitude)),
-      map((response) => response.forecasts),
-      tap((forecasts) => {
-        const withHourForecasts = forecasts.filter((i) => i.hours.length != 0);
-
-        this.firstDay = resetTimeForDate(new Date(withHourForecasts[0].date));
-        this.lastDay = resetTimeForDate(new Date(withHourForecasts[withHourForecasts.length - 1].date));
-      }),
-    ).subscribe(this._weatherForecasts$);
-
-    combineLatest(
-      [
-        this._weatherForecasts$,
-        this._doReload$,
-      ]
-    ).pipe(
-      tap(([forecast]) => this._updatableWeatherForecasts$.next(forecast)),
-    ).subscribe();
-  }
-
-  ngOnDestroy() {
-    this._alive$.next();
-    this._alive$.complete();
   }
 
   changeDate(date: Date) {
@@ -162,6 +115,51 @@ export class ChartsComponent implements OnInit, OnDestroy {
     this.resourceTypeToggles[resource] = !this.resourceTypeToggles[resource];
 
     this._doReload$.next();
+  }
+
+  private _convertDataSetsToChart(chartData: DataSetsForCharts): ChartDataSets[] {
+    const dataSet = <ChartDataSets[]>[];
+
+    this.resourceTypes.forEach((res) => {
+      if (this.resourceTypeToggles[res]) {
+        dataSet.push(
+          {
+            backgroundColor: `${<string>ResourceTypeColors[res]}50`,
+            borderColor: <string>ResourceTypeColors[res],
+            data: chartData[res],
+            label: <string>ResourceTypeNames[res],
+            pointBackgroundColor: <string>ResourceTypeColors[res],
+            pointBorderColor: <string>ResourceTypeColors[res],
+          },
+        );
+      }
+    });
+
+    return dataSet;
+  }
+
+  private _convertForecastsToDataSets(forecasts: YandexWeatherForecast[]): DataSetsForCharts {
+    return forecasts.reduce(
+      (acc, x) => ({
+        humidity: acc.humidity.concat(x.hours.filter((i) => this._filterChartByDate(i.hour_ts)).map((i) => i.humidity)),
+        pressure: acc.pressure.concat(x.hours.filter((i) => this._filterChartByDate(i.hour_ts)).map((i) => i.pressure_mm)),
+        temperature: acc.temperature.concat(x.hours.filter((i) => this._filterChartByDate(i.hour_ts)).map((i) => i.temp)),
+      }),
+      <DataSetsForCharts>{
+        humidity: [],
+        pressure: [],
+        temperature: [],
+      }
+    );
+  }
+
+  private _convertForecastsToLabels(forecasts: YandexWeatherForecast[]): Label[] {
+    return forecasts.reduce(
+      (acc, x) => acc.concat(
+        x.hours.filter((i) => this._filterChartByDate(i.hour_ts)).map((i) => `${unixTimeToDate(i.hour_ts).toUTCString()}`)
+      ),
+      <Label[]>[]
+    );
   }
 
   private _filterChartByDate(date: number): boolean {
