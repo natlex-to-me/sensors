@@ -6,8 +6,8 @@
    [routerLink]="routeToTable$ | async">Go to table</a>
 
 <div class="grid-layout">
-  <ng-container *ngIf="chartDataSets$ | async as chartDataSets">
-    <ng-container *ngIf="chartLabels$ | async as chartLabels">
+  <ng-container *ngIf="chartDataSets$ | async as chartDataSets; else preloader">
+    <ng-container *ngIf="chartLabels$ | async as chartLabels; else preloader">
       <ng-container *ngFor="let resourceType of resourceTypes">
         <div class="chart">
           <h3>{{ resourceTypeNames[resourceType] }}</h3>
@@ -46,3 +46,9 @@
 
   <mat-datepicker #picker></mat-datepicker>
 </mat-form-field>
+
+<ng-template #preloader>
+  <ng-container *ngFor="let a of [1, 2, 3, 4]">
+    <div class="preload-chart"></div>
+  </ng-container>
+</ng-template>
