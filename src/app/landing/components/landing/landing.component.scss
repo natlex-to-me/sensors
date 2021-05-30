@@ -3,3 +3,24 @@
 :host {
   display: contents;
 }
+
+.chart-image {
+  max-height: 80%;
+  max-width: 80%;
+}
+
+.chart-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 50px;
+  position: relative;
+}
+
+.chart-link {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
