@@ -1,0 +1,16 @@
+@import './colors';
+@import './text-mixins';
+
+.go-button {
+  @include app-text-bold();
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $main;
+  border: 1px solid $main;
+  border-radius: 1000px;
+  color: #fff;
+  width: 200px;
+  height: 40px;
+}
