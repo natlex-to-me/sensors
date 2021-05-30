@@ -1,13 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
 import {
   concatMap,
   map,
+  shareReplay,
 } from 'rxjs/operators';
 
 import {
@@ -34,7 +33,7 @@ import { WeatherStorageService } from '../../../../services/weather-storage.serv
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
 })
-export class TableComponent implements OnInit {
+export class TableComponent {
   readonly resourceTypes = Object.values(ResourceTypes);
   readonly resourceTypeNames = ResourceTypeNames;
 
@@ -50,19 +49,15 @@ export class TableComponent implements OnInit {
     map((cityId) => <Coordinates>CityCoordinates[cityId]),
   );
 
-  private readonly _weatherForecasts$ = new BehaviorSubject(<YandexWeatherForecast[]>[]);
+  private readonly _weatherForecasts$ = this._cityCoordinates$.pipe(
+    concatMap((coordinates) => this._weatherStorage.getYandexWeatherForecast(coordinates.latitude, coordinates.longitude)),
+    map((response) => response.forecasts),
+    shareReplay(),
+  );
 
   readonly tableDataSets$ = this._weatherForecasts$.pipe(
-    map((forecasts) => forecasts.reduce(
-      (acc, x) => acc.concat(x.hours),
-      <YandexWeatherHourForecast[]>[]
-    )),
-    map((hourForecasts) => hourForecasts.map((hourForecast) => <DataSetsForTable>{
-      date: unixTimeToDate(hourForecast.hour_ts).toUTCString(),
-      humidity: hourForecast.humidity,
-      pressure: hourForecast.pressure_mm,
-      temperature: hourForecast.temp,
-    })),
+    map((forecasts) => this._convertForecastsToHourForecasts(forecasts)),
+    map((hourForecasts) => this._convertHourForecastsToTable(hourForecasts)),
   );
 
   readonly displayedColumns$ = this.tableDataSets$.pipe(
@@ -79,10 +74,19 @@ export class TableComponent implements OnInit {
   ) {
   }
 
-  ngOnInit() {
-    this._cityCoordinates$.pipe(
-      concatMap((coordinates) => this._weatherStorage.getYandexWeatherForecast(coordinates.latitude, coordinates.longitude)),
-      map((response) => response.forecasts),
-    ).subscribe(this._weatherForecasts$);
+  private _convertForecastsToHourForecasts(forecasts: YandexWeatherForecast[]): YandexWeatherHourForecast[] {
+    return forecasts.reduce(
+      (acc, x) => acc.concat(x.hours),
+      <YandexWeatherHourForecast[]>[]
+    );
+  }
+
+  private _convertHourForecastsToTable(forecasts: YandexWeatherHourForecast[]): DataSetsForTable[] {
+    return forecasts.map((hourForecast) => <DataSetsForTable>{
+      date: unixTimeToDate(hourForecast.hour_ts).toUTCString(),
+      humidity: hourForecast.humidity,
+      pressure: hourForecast.pressure_mm,
+      temperature: hourForecast.temp,
+    });
   }
 }
