@@ -30,6 +30,10 @@ export class ChartComponent implements OnChanges {
   nextChartTypeIndex = 1;
   currentChartType = <ChartType>ChartTypeToggleOrder[this.nextChartTypeIndex - 1];
 
+  get nextChartType(): ChartType {
+    return <ChartType>ChartTypeToggleOrder[this.nextChartTypeIndex];
+  }
+
   ngOnChanges() {
     this._filterDataSetsByLabel();
   }
