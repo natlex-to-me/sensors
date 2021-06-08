@@ -12,10 +12,14 @@ import {
 import {
   map,
   shareReplay,
+  startWith,
   tap,
 } from 'rxjs/operators';
 
-import { AppRoutes } from '../../../../../core/constants';
+import {
+  AppRoutes,
+  LoadingStatuses,
+} from '../../../../../core/constants';
 import {
   ResourceTypeColors,
   ResourceTypeNames,
@@ -45,6 +49,7 @@ import {
 export class ChartsComponent {
   firstDay = new Date();
   lastDay = new Date();
+  loadingStatuses = LoadingStatuses;
   pickedDate = resetTimeForDate(new Date());
 
   readonly resourceTypes = Object.values(ResourceTypes);
@@ -75,9 +80,23 @@ export class ChartsComponent {
     map(([forecast]) => forecast),
   );
 
-  readonly chartDataSets$ = this._updatableWeatherForecasts$.pipe(
+  private readonly _loadedChartDataSets$ = this._updatableWeatherForecasts$.pipe(
     map((forecasts) => this._convertForecastsToDataSets(forecasts)),
+  );
+
+  readonly chartDataSets$ = this._loadedChartDataSets$.pipe(
     map((chartData) => this._convertDataSetsToChart(chartData)),
+  );
+
+  readonly loadingStatus$ = this._loadedChartDataSets$.pipe(
+    map((i) => {
+      if (i.humidity.length > 0 || i.pressure.length > 0 || i.temperature.length > 0) {
+        return LoadingStatuses.hasLoaded;
+      }
+
+      return LoadingStatuses.hasNoData;
+    }),
+    startWith(LoadingStatuses.isLoading),
   );
 
   readonly chartLabels$ = this._updatableWeatherForecasts$.pipe(

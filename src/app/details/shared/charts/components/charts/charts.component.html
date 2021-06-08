@@ -6,24 +6,17 @@
    [routerLink]="routeToTable$ | async">Go to table</a>
 
 <div class="grid-layout">
-  <ng-container *ngIf="chartDataSets$ | async as chartDataSets; else preloader">
-    <ng-container *ngIf="chartLabels$ | async as chartLabels; else preloader">
-      <ng-container *ngFor="let resourceType of resourceTypes">
-        <div class="chart">
-          <h3>{{ resourceTypeNames[resourceType] }}</h3>
+  <ng-container [ngSwitch]="loadingStatus$ | async">
+    <ng-container *ngSwitchCase="loadingStatuses.isLoading">
+      <ng-container *ngTemplateOutlet="charts"></ng-container>
+    </ng-container>
 
-          <app-chart [dataSets]="chartDataSets"
-                     [filterByLabel]="resourceTypeNames[resourceType]"
-                     [labels]="chartLabels"></app-chart>
-        </div>
-      </ng-container>
+    <ng-container *ngSwitchCase="loadingStatuses.hasLoaded">
+      <ng-container *ngTemplateOutlet="charts"></ng-container>
+    </ng-container>
 
-      <div class="chart">
-        <h3>All-in-one</h3>
-
-        <app-chart [dataSets]="chartDataSets"
-                   [labels]="chartLabels"></app-chart>
-      </div>
+    <ng-container *ngSwitchCase="loadingStatuses.hasNoData">
+      <p class="no-data-message">There is no data to view</p>
     </ng-container>
   </ng-container>
 </div>
@@ -47,8 +40,26 @@
   <mat-datepicker #picker></mat-datepicker>
 </mat-form-field>
 
-<ng-template #preloader>
-  <ng-container *ngFor="let a of [1, 2, 3, 4]">
-    <div class="preload-chart"></div>
+<ng-template #charts>
+  <ng-container *ngIf="{
+                              data: chartDataSets$ | async,
+                              labels: chartLabels$ | async
+                            } as chart">
+    <ng-container *ngFor="let resourceType of resourceTypes">
+      <div class="chart">
+        <h3>{{ resourceTypeNames[resourceType] }}</h3>
+
+        <app-chart [dataSets]="chart.data"
+                   [filterByLabel]="resourceTypeNames[resourceType]"
+                   [labels]=" chart.labels"></app-chart>
+      </div>
+    </ng-container>
+
+    <div class="chart">
+      <h3>All-in-one</h3>
+
+      <app-chart [dataSets]="chart.data"
+                 [labels]="chart.labels"></app-chart>
+    </div>
   </ng-container>
 </ng-template>
