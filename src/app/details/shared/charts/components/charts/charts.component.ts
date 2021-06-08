@@ -60,12 +60,7 @@ export class ChartsComponent {
   private readonly _cityCoordinates$ = setCityCoordinates(this._cityId$);
 
   readonly _weatherForecasts$ = getWeatherForecasts(this._cityCoordinates$, this._weatherStorage).pipe(
-    tap((forecasts) => {
-      const withHourForecasts = forecasts.filter((i) => i.hours.length != 0);
-
-      this.firstDay = resetTimeForDate(new Date(withHourForecasts[0].date));
-      this.lastDay = resetTimeForDate(new Date(withHourForecasts[withHourForecasts.length - 1].date));
-    }),
+    tap((forecasts) => this._setFirstAndLastDay(forecasts)),
     shareReplay(),
   );
 
@@ -157,5 +152,12 @@ export class ChartsComponent {
 
   private _filterChartByDate(date: number): boolean {
     return resetTimeForDate(unixTimeToDate(date)).getTime() == this.pickedDate.getTime();
+  }
+
+  private _setFirstAndLastDay(forecasts: YandexWeatherForecast[]) {
+    const withHourForecasts = forecasts.filter((i) => i.hours.length != 0);
+
+    this.firstDay = resetTimeForDate(new Date(withHourForecasts[0].date));
+    this.lastDay = resetTimeForDate(new Date(withHourForecasts[withHourForecasts.length - 1].date));
   }
 }
