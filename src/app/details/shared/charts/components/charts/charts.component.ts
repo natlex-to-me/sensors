@@ -10,24 +10,18 @@ import {
   combineLatest,
 } from 'rxjs';
 import {
-  concatMap,
   map,
   shareReplay,
   tap,
 } from 'rxjs/operators';
 
-import {
-  AppRouteParams,
-  AppRoutes,
-  CityCoordinates,
-} from '../../../../../core/constants';
+import { AppRoutes } from '../../../../../core/constants';
 import {
   ResourceTypeColors,
   ResourceTypeNames,
   ResourceTypes,
   ResourceTypeToggles,
 } from '../../../../../core/constants/resource-types';
-import { Coordinates } from '../../../../../core/models';
 import {
   resetTimeForDate,
   unixTimeToDate,
@@ -36,6 +30,11 @@ import { DetailPaths } from '../../../../detail-paths';
 import { DataSetsForCharts } from '../../../../models/data-sets-for-charts';
 import { YandexWeatherForecast } from '../../../../models/yandex-weather';
 import { WeatherStorageService } from '../../../../services/weather-storage.service';
+import {
+  getWeatherForecasts,
+  setCity,
+  setCityCoordinates,
+} from '../../../../utils';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,21 +51,15 @@ export class ChartsComponent {
   readonly resourceTypeNames = ResourceTypeNames;
   readonly resourceTypeToggles = ResourceTypeToggles;
 
-  private readonly _cityId$ = this._route.params.pipe(
-    map((params) => String(params[AppRouteParams.CityId])),
-  );
+  private readonly _cityId$ = setCity(this._route.params);
 
   readonly routeToTable$ = this._cityId$.pipe(
     map((cityId) => AppRoutes.getUrlFromRoute(AppRoutes.Details, DetailPaths.table, cityId))
   );
 
-  private readonly _cityCoordinates$ = this._cityId$.pipe(
-    map((cityId) => <Coordinates>CityCoordinates[cityId]),
-  );
+  private readonly _cityCoordinates$ = setCityCoordinates(this._cityId$);
 
-  readonly _weatherForecasts$ = this._cityCoordinates$.pipe(
-    concatMap((coordinates) => this._weatherStorage.getYandexWeatherForecast(coordinates.latitude, coordinates.longitude)),
-    map((response) => response.forecasts),
+  readonly _weatherForecasts$ = getWeatherForecasts(this._cityCoordinates$, this._weatherStorage).pipe(
     tap((forecasts) => {
       const withHourForecasts = forecasts.filter((i) => i.hours.length != 0);
 
