@@ -52,6 +52,10 @@ export class ChartComponent implements OnChanges {
   }
 
   private _filterDataSetsByLabel() {
+    if (!this.dataSets) {
+      return;
+    }
+
     if (this.filterByLabel) {
       this.dataSetsToShow = this.dataSets.filter((i) => i.label == this.filterByLabel);
     } else {

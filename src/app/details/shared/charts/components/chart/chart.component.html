@@ -1,11 +1,18 @@
-<div class="chart">
-  <canvas baseChart
-          [chartType]="currentChartType"
-          [datasets]="dataSetsToShow"
-          [labels]="labels"
-          [options]="options"></canvas>
+<ng-container *ngIf="dataSets; else preloader">
+  <div class="chart">
+    <canvas baseChart
+            [chartType]="currentChartType"
+            [datasets]="dataSetsToShow"
+            [labels]="labels"
+            [options]="options"></canvas>
 
-  <button (click)="toggleChartsType(nextChartTypeIndex)"
-          mat-raised-button>Toggle charts to
-    {{ nextChartType }} mode</button>
-</div>
+    <button (click)="toggleChartsType(nextChartTypeIndex)"
+            mat-raised-button>Toggle charts to
+      {{ nextChartType }} mode</button>
+  </div>
+</ng-container>
+
+<ng-template #preloader>
+  <div class="preload-chart">
+  </div>
+</ng-template>
