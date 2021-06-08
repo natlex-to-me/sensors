@@ -1,9 +1,18 @@
 import { Routes } from '@angular/router';
 
+import {
+  AppRoutes,
+  HOME_ROUTE,
+} from '../core/constants';
 import { DetailsComponent } from './components/details/details.component';
 import { DetailPaths } from './detail-paths';
 
 export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: AppRoutes.getUrlFromRoute(HOME_ROUTE),
+  },
   {
     path: '',
     component: DetailsComponent,
