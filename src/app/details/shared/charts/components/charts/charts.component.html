@@ -7,16 +7,32 @@
 
 <div class="grid-layout">
   <ng-container [ngSwitch]="loadingStatus$ | async">
-    <ng-container *ngSwitchCase="loadingStatuses.isLoading">
-      <ng-container *ngTemplateOutlet="charts"></ng-container>
-    </ng-container>
-
-    <ng-container *ngSwitchCase="loadingStatuses.hasLoaded">
-      <ng-container *ngTemplateOutlet="charts"></ng-container>
-    </ng-container>
-
     <ng-container *ngSwitchCase="loadingStatuses.hasNoData">
       <p class="no-data-message">There is no data to view</p>
+    </ng-container>
+
+    <ng-container *ngSwitchDefault>
+      <ng-container *ngIf="{
+                      data: chartDataSets$ | async,
+                      labels: chartLabels$ | async
+                    } as chart">
+        <ng-container *ngFor="let resourceType of resourceTypes">
+          <div class="chart">
+            <h3>{{ resourceTypeNames[resourceType] }}</h3>
+
+            <app-chart [dataSets]="chart.data"
+                       [filterByLabel]="resourceTypeNames[resourceType]"
+                       [labels]=" chart.labels"></app-chart>
+          </div>
+        </ng-container>
+
+        <div class="chart">
+          <h3>All-in-one</h3>
+
+          <app-chart [dataSets]="chart.data"
+                     [labels]="chart.labels"></app-chart>
+        </div>
+      </ng-container>
     </ng-container>
   </ng-container>
 </div>
@@ -39,27 +55,3 @@
 
   <mat-datepicker #picker></mat-datepicker>
 </mat-form-field>
-
-<ng-template #charts>
-  <ng-container *ngIf="{
-                              data: chartDataSets$ | async,
-                              labels: chartLabels$ | async
-                            } as chart">
-    <ng-container *ngFor="let resourceType of resourceTypes">
-      <div class="chart">
-        <h3>{{ resourceTypeNames[resourceType] }}</h3>
-
-        <app-chart [dataSets]="chart.data"
-                   [filterByLabel]="resourceTypeNames[resourceType]"
-                   [labels]=" chart.labels"></app-chart>
-      </div>
-    </ng-container>
-
-    <div class="chart">
-      <h3>All-in-one</h3>
-
-      <app-chart [dataSets]="chart.data"
-                 [labels]="chart.labels"></app-chart>
-    </div>
-  </ng-container>
-</ng-template>
